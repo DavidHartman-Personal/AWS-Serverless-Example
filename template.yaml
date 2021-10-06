@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  usaid_bia_v2
+Globals:
+  Function:
+    Timeout: 3
+Resources:
+  FilePostingBroker:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: file_posting_broker
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.6
+      FunctionName: "file_posting_broker"
+      Environment:
+        Variables:
+          ENDPOINT: "rds-postgres-usaid-metadata-read-only.endpoint.proxy-cfydm4e1awn9.us-east-1.rds.amazonaws.com"
+          PORT: 5432
+          DATABASE: "rds-postgres-usaid-metadata"
+          DBUSER: "masteruser"
+          DBPASSWORD: "JUz0!'ezTC"
+          REGION: "us-east-1"
+      VpcConfig:
+        SubnetIds:
+          - subnet-0cd583612820eeffb
+          - subnet-03a5f6308809f73c6
+        SecurityGroupIds:
+          - sg-01a6866a311ed79a0
+Outputs:
+  FilePostingBroker:
+    Description: "process incoming files"
+    Value: !GetAtt FilePostingBroker.Arn

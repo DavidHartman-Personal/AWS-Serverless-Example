@@ -1,0 +1,18 @@
+version = 0.1
+[dave-personal]
+[dave-personal.deploy]
+[dave-personal.deploy.parameters]
+stack_name = "FilePostingBrokerTest"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-wpu24m6n1w3q"
+s3_prefix = "file_posting_broker_test"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "FilePostingBrokerTest"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-wpu24m6n1w3q"
+s3_prefix = "FilePostingBrokerTest"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
