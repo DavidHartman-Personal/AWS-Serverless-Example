@@ -5,7 +5,7 @@ export AWS_PROFILE="dave-personal"
 # root of project directory...assumes setup.sh is in project root
 # /mnt/c/Users/david/Dropbox/Programming/Python/PyCharmProjects/usaid-ghsc-bia-djh/
 # root_dir=$(pwd)
-root_dir="/mnt/c/Users/david/Dropbox/Programming/Python/PyCharmProjects/AWS_Serverless/usaid_bia_v2"
+root_dir="/mnt/c/Users/david/Dropbox/Programming/Python/PyCharmProjects/AWS-Serverless-Example"
 
 
 echo "Root directory: ${root_dir}"

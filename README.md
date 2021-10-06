@@ -1,11 +1,33 @@
 # usaid_bia_v2
 
+Resources container in this repository:
+
+| Resource            | Type                    | Description                                                                         |
+|:--------------------|:------------------------|:------------------------------------------------------------------------------------|
+| file_posting_broker | Folder                  | contains main Lambda functioncode                                                   |
+| tests               | Folder                  | Contains unit/etc. test code and data                                               |
+| setup.sh            | Shell Script            | Shell script that contains variable settings, functions, etc. used in other scripts |
+| execute_lambda.sh   | Shell Script            | Shell script to execute Lambda Function                                             |
+| get_logs.sh         | Shell Script            | Script to grab CloudWatch logs for a Lambda exuection                               |
+| README.md           | Readme file             | This readme document                                                                |
+| samconfig.toml      | SAM Config File         | Used to run sam commands without prompts                                            |
+| template.yaml       | CloudFormation Template | cfn Tempalte file to create Serverless resources                                        |
 
 ## Deploy the sample application
 
 To build and deploy your application for the first time, run the following in your shell:
 
 ```bash
+# Run setup.sh script to set AWS_PROFILE,etc.
+source ./setup.sh 
+```
+
+Run the following commands to build and deploy serverless function.
+```bash
+
+# Remove the .aws_sam folder for clean build.  This avoids the permissions error sometimes seen with sam build commands
+# Note that the remove sometimes is needed multiple times due to odd permissions errors.
+rm -Rf .aws-sam/
 sam build --use-container
 sam deploy --guided
 ```
