@@ -26,6 +26,16 @@ Resources:
           - subnet-03a5f6308809f73c6
         SecurityGroupIds:
           - sg-01a6866a311ed79a0
+      Layers:
+        - !Ref UtilitiesLayer
+  UtilitiesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: utilities_layer
+      ContentUri: utilities_layer/
+      CompatibleRuntimes:
+        - python3.6
+      RetentionPolicy: Retain
 Outputs:
   FilePostingBroker:
     Description: "process incoming files"

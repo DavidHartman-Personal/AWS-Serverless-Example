@@ -1,5 +1,12 @@
 # usaid_bia_v2
 
+Prototype options and related tags
+
+Tag - BASE_AWS_SERVERLESS_FUNCTION: A functional base sam template, code and resources to create a lambda function
+
+- [x] Create base lambda serverless function. Tag: BASE_AWS_SERVERLESS_FUNCTION
+- [ ] Create Application Layer with resuable function
+
 Resources container in this repository:
 
 | Resource            | Type                    | Description                                                                         |
@@ -12,6 +19,36 @@ Resources container in this repository:
 | README.md           | Readme file             | This readme document                                                                |
 | samconfig.toml      | SAM Config File         | Used to run sam commands without prompts                                            |
 | template.yaml       | CloudFormation Template | cfn Tempalte file to create Serverless resources                                        |
+
+
+## Lambda Function CloudFormation/SAM [Lambda Function CloudFormation/SAM Definition]
+
+```yaml
+  FilePostingBroker:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: file_posting_broker
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.6
+      FunctionName: "file_posting_broker"
+      Environment:
+        Variables:
+          ENDPOINT: "rds-postgres-usaid-metadata-read-only.endpoint.proxy-cfydm4e1awn9.us-east-1.rds.amazonaws.com"
+          PORT: 5432
+          DATABASE: "rds-postgres-usaid-metadata"
+          DBUSER: "masteruser"
+          DBPASSWORD: "JUz0!'ezTC"
+          REGION: "us-east-1"
+      VpcConfig:
+        SubnetIds:
+          - subnet-0cd583612820eeffb
+          - subnet-03a5f6308809f73c6
+        SecurityGroupIds:
+          - sg-01a6866a311ed79a0
+      Layers:
+        - !Ref UtilitiesLayer
+
+```
 
 ## Deploy the sample application
 
@@ -42,44 +79,60 @@ The first command will build the source of your application. The second command 
 * **Allow SAM CLI IAM role creation**: Many AWS SAM templates, including this example, create AWS IAM roles required for the AWS Lambda function(s) included to access AWS services. By default, these are scoped down to minimum required permissions. To deploy an AWS CloudFormation stack which creates or modifies IAM roles, the `CAPABILITY_IAM` value for `capabilities` must be provided. If permission isn't provided through this prompt, to deploy this example you must explicitly pass `--capabilities CAPABILITY_IAM` to the `sam deploy` command.
 * **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
 
-## Use the SAM CLI to build and test locally
+## Execute Lambda Function
 
-Build your application with the `sam build --use-container` command.
+The [execute_lambda.sh](execute_lambda.sh) script will invokde the lambda function and print the results.
 
-```bash
-usaid_bia_v2$ sam build --use-container
-```
+## Add Helper Layer and Functions
 
-The SAM CLI installs dependencies defined in `hello_world/requirements.txt`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
+Steps for creating utilities reusable layer.
 
-Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
+1. Create folder for utilities_layer/
+2. Create python/ folder (See Python requirements for Lambda Layers)
+3. Add utility_test.py Python source code file to utilities_layer/python/
+4. Create zip archive for upload
+5. Add LayerVerion definition to SAM template.yaml
+    ```yaml
+    UtilitiesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: helper-layer
+      ContentUri: ./helper-layer/python.zip
+      CompatibleRuntimes:
+        - python3.6
+      RetentionPolicy: Retain
+    ```
+6. Add import statement `from my_common_function import say_hello ` into lambda handler function.
 
-Run functions locally and invoke them with the `sam local invoke` command.
+For shared depencencies/libraries:
 
-```bash
-usaid_bia_v2$ sam local invoke HelloWorldFunction --event events/event.json
-```
+### For shared libraries
 
-The SAM CLI can also emulate your application's API. Use the `sam local start-api` to run the API locally on port 3000.
-
-```bash
-usaid_bia_v2$ sam local start-api
-usaid_bia_v2$ curl http://localhost:3000/
-```
-
-The SAM CLI reads the application template to determine the API's routes and the functions that they invoke. The `Events` property on each function's definition includes the route and method for each path.
+If you want to create a Layer that also embeds dependencies, the AWS SAM template will look like this
 
 ```yaml
-      Events:
-        HelloWorld:
-          Type: Api
-          Properties:
-            Path: /hello
-            Method: get
+MyLibLayer:
+  Type: AWS::Serverless::LayerVersion
+  Properties:
+    ContentUri: utilities_layer
+    CompatibleRuntimes:
+      - python3.6
+  Metadata:
+    BuildMethod: python3.6
 ```
+The only differences are the Metadata and BuildMethod fields, telling AWS SAM that we want to build our Layer using python 3.8 interpreter
 
-## Add a resource to your application
-The application template uses AWS Serverless Application Model (AWS SAM) to define application resources. AWS SAM is an extension of AWS CloudFormation with a simpler syntax for configuring common serverless application resources such as functions, triggers, and APIs. For resources not included in [the SAM specification](https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md), you can use standard [AWS CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html) resource types.
+So during the execution of sam build SAM will execute a pip install -r my_lib_layer/requirements.txt -t .aws-sam/build/MyLibLayer downloading our dependencies
+
+This time we can get rid of the python folder but we need to add the requirements.txt
+
+So we would have:
+utilities_layer/
+  requirements.txt
+
+For PyCharm import error, mark utilities_layer/python directory as source root like we
+
+NOTE: To create layer zip manually, run `python -m pip install -r requirements.txt`
 
 ## Fetch, tail, and filter Lambda function logs
 
@@ -114,4 +167,5 @@ aws cloudformation delete-stack --stack-name usaid_bia_v2
 
 See the [AWS SAM developer guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) for an introduction to SAM specification, the SAM CLI, and serverless application concepts.
 
-Next, you can use AWS Serverless Application Repository to deploy ready to use Apps that go beyond hello world samples and learn how authors developed their applications: [AWS Serverless Application Repository main page](https://aws.amazon.com/serverless/serverlessrepo/)
+[Lambda Function CloudFormation/SAM Definition]: #lambda-function-cloudformationsam-definition
+

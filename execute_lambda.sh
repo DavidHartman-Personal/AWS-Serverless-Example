@@ -15,7 +15,7 @@
 # and limitations under the License.
 source ./setup.sh
 
-echo "Running lambda function: ${file_posting_broker_lambda_function_arn}"
+echo "Running lambda function: ${file_posting_broker_lambda_function_name}"
 test_event='{name: blah.tar.gz}'
 payload=`echo '{"name": "blah.tar.gz" }' | openssl base64`
 
