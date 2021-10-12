@@ -32,7 +32,7 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: utilities_layer
-      ContentUri: utilities_layer/
+      ContentUri: utilities_layer
       CompatibleRuntimes:
         - python3.6
       RetentionPolicy: Retain

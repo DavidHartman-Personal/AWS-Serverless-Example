@@ -85,7 +85,44 @@ The [execute_lambda.sh](execute_lambda.sh) script will invokde the lambda functi
 
 ## Add Helper Layer and Functions
 
-Steps for creating utilities reusable layer.
+Steps for creating utilities reusable layer using the SAM cli.
+
+1. Create folder for utilities_layer/
+2. Create python/ folder (See Python requirements for Lambda Layers)
+3. Create python file(s) (e.g.utility_test.py) source code to utilities_layer/python/ directory
+4. Add LayerVerion definition to SAM template.yaml.  Note that the ContentUri is noted as the base folder for the layer definition, with the source code in the python directory below the main folder.
+    ```yaml
+    UtilitiesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: utilities_layer
+      ContentUri: utilities_layer/
+      CompatibleRuntimes:
+        - python3.6
+      RetentionPolicy: Retain
+    ```
+5. Add Layer reference to the SAM template function definition that is using the newly created layer.
+   ```yaml
+   Layers:
+        - !Ref UtilitiesLayer
+   ```
+6. Run `sam build --use-container` command.
+7. Run `sam deploy` command to deploy layer and updated function.
+8. In PyCharm, to avoid source code errors, include layer code as a Source in the settings.
+
+To reference the layers functions, an import is needed.  If the source code from the layer is stored in python/utilities_layer.py and
+there is a function named test_utilities(), an import as below would be needed.
+
+`import utilities_layer as ul`
+
+To call the function, the souce code would be the following:'
+`ul.test_utilities()`
+
+custom_func.py - contains cust_func() function.
+
+import custom_func as cf
+
+Steps for creating utilities reusable layer "manually".
 
 1. Create folder for utilities_layer/
 2. Create python/ folder (See Python requirements for Lambda Layers)
